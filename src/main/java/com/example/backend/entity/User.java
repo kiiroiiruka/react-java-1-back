@@ -8,20 +8,21 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
+//RDBのデータベースの場合はこのファイルのように変換用のファイルが必要
 //@Entity このクラスはDBのテーブルに対応する。1つのインスタンス = テーブルの1行
 @Entity
 @Table(name = "users") // "user" はDBの予約語なので users にする
 public class User {
 
-	@Id // 主キー
-	@GeneratedValue(strategy = GenerationType.IDENTITY) // 1, 2, 3... とDBが自動で番号を振る
+	@Id                                                 // 主キーです
+	@GeneratedValue(strategy = GenerationType.IDENTITY) // 番号は自動で振ってね
 	private Long id;
 
-	@Column(nullable = false, unique = true) // 必須・重複禁止
+	//もしも「nullable = false」でnullを禁止する
+	@Column(nullable = false, unique = true)  // 1つの @Column に設定が2つ
 	private String email;
 
-	// 平文ではなくBCryptでハッシュ化した値を入れる
+	//ここでパスワードのまま保存せずにハッシュ化するようにしている
 	@Column(nullable = false)
 	private String passwordHash;
 

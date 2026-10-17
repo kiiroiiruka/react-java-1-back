@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.example.backend.dto.AuthRequest;
 import com.example.backend.dto.AuthResponse;
 import com.example.backend.entity.User;
+//DIコンテナ経由ではないため以下のようにimportする必要がある
 import com.example.backend.repository.UserRepository;
 
 //@Service 「このクラスは実際の処理を担当する」と宣言する。コントローラーから呼ばれる
@@ -23,7 +24,16 @@ public class AuthService {
 
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
-
+	/*
+	PasswordConfig                  DI コンテナ                 AuthService
+	@Bean passwordEncoder()  ──▶  BCrypt の実物を保管
+										│
+										│  Spring が「PasswordEncoder 型が欲しいのか」
+										│  → 保管庫から探して渡す
+										▼
+								public AuthService(PasswordEncoder passwordEncoder)
+								「PasswordEncoder 型のものをください」と言っているだけ
+	*/
 	public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;

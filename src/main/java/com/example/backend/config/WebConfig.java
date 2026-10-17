@@ -8,13 +8,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 // ※@ConfigurationがついているためSpringがWebConfigをnewしてDIコンテナに登録する。
 // さらにWebMvcConfigurerを実装しているため、SpringはこのクラスをWeb設定用だと認識し、
 // オーバーライドしたaddCorsMappingsを起動時に呼び出してCORS設定を反映する。
+
+// CORS→「別のサイトから API を呼んでもいいか」をサーバーが許可する仕組み
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 	//適応方法は二つある・
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
 		registry
-			.addMapping("/api/**")
+			.addMapping("/api/**")// /api/ から始まるURLがフロントから来たらCORSを許可する
 			.allowedOrigins("http://localhost:5173")
 			.allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE");
 	}
