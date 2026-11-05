@@ -29,6 +29,10 @@ public class User {
 	@Column(nullable = false)
 	private Instant createdAt;
 
+	// メールの確認が終わった日時。まだ確認していない人は null（= 仮登録）
+	// nullable = false を付けないので、空っぽ（NULL）を入れてもいい列になる
+	private Instant emailVerifiedAt;
+
 	// JPAがDBから読み込むときに使う空のコンストラクタ（必須）
 	protected User() {
 	}
@@ -53,5 +57,15 @@ public class User {
 
 	public Instant getCreatedAt() {
 		return createdAt;
+	}
+
+	// emailVerifiedAt に日時が入っていれば確認済み
+	public boolean isEmailVerified() {
+		return emailVerifiedAt != null;
+	}
+
+	// メールの確認が終わったときに呼ぶ。今の日時を記録する
+	public void markEmailVerified() {
+		this.emailVerifiedAt = Instant.now();
 	}
 }

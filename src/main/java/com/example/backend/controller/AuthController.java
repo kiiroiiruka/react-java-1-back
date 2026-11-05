@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.AuthRequest;
 import com.example.backend.dto.AuthResponse;
+import com.example.backend.dto.VerifyRequest;
 import com.example.backend.service.AuthService;
+import com.example.backend.service.EmailVerificationService;
 
 import jakarta.validation.Valid;
 
@@ -20,12 +22,15 @@ import jakarta.validation.Valid;
 public class AuthController {
 
 	private final AuthService authService;
+	private final EmailVerificationService emailVerificationService;
 
-	// Springが自動でAuthServiceを渡してくれる（DI：依存性の注入）
-	public AuthController(AuthService authService) {
+	// Springが自動でAuthServiceなどを渡してくれる（DI：依存性の注入）
+	public AuthController(AuthService authService, EmailVerificationService emailVerificationService) {
 		this.authService = authService;
+		this.emailVerificationService = emailVerificationService;
 	}
 
+	//新規登録
 	// POST /api/auth/register  @RequestBody 送られてきたJSONをAuthRequestに変換して受け取る
 	// @Valid AuthRequestに書いたチェック（メール形式・8文字以上など）を実行し、NGなら自動で400を返す
 	@PostMapping("/register")
@@ -38,5 +43,12 @@ public class AuthController {
 	@PostMapping("/login")
 	public AuthResponse login(@RequestBody AuthRequest req) {
 		return authService.login(req);
+	}
+
+	// POST /api/auth/verify  メール内のリンクから開いた画面（VerifyEmailPage）が呼ぶ
+	// 成功なら200、無効・使用済みなら400、期限切れなら410（判定は EmailVerificationService）
+	@PostMapping("/verify")
+	public AuthResponse verify(@Valid @RequestBody VerifyRequest req) {
+		return emailVerificationService.verify(req.token());
 	}
 }
