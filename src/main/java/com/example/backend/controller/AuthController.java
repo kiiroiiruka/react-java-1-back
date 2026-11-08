@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.AuthRequest;
 import com.example.backend.dto.AuthResponse;
+import com.example.backend.dto.LoginResponse;
 import com.example.backend.dto.VerifyRequest;
 import com.example.backend.service.AuthService;
 import com.example.backend.service.EmailVerificationService;
@@ -39,9 +40,9 @@ public class AuthController {
 		return authService.register(req);
 	}
 
-	// POST /api/auth/login
+	// POST /api/auth/login  成功するとJWT（token）が返る
 	@PostMapping("/login")
-	public AuthResponse login(@RequestBody AuthRequest req) {
+	public LoginResponse login(@RequestBody AuthRequest req) {
 		return authService.login(req);
 	}
 

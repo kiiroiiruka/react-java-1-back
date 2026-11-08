@@ -12,6 +12,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.example.backend.dto.AuthRequest;
 import com.example.backend.dto.AuthResponse;
+import com.example.backend.dto.LoginResponse;
+import com.example.backend.dto.MeResponse;
 import com.example.backend.entity.User;
 //DIコンテナ経由ではないため以下のようにimportする必要がある
 import com.example.backend.repository.UserRepository;
@@ -26,6 +28,7 @@ public class AuthService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final EmailVerificationService emailVerificationService;
+	private final TokenService tokenService;
 	/*
 	PasswordConfig                  DI コンテナ                 AuthService
 	@Bean passwordEncoder()  ──▶  BCrypt の実物を保管
@@ -38,10 +41,11 @@ public class AuthService {
 	*/
 
 	public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-			EmailVerificationService emailVerificationService) {
+			EmailVerificationService emailVerificationService, TokenService tokenService) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.emailVerificationService = emailVerificationService;
+		this.tokenService = tokenService;
 	}
 
 	//エラーが怒ったらその処理はなかったことにしようとするのが@Transactional。
@@ -76,7 +80,7 @@ public class AuthService {
 		return new AuthResponse(email, "確認メールを送信しました");
 	}
 
-	public AuthResponse login(AuthRequest req) {
+	public LoginResponse login(AuthRequest req) {
 		if (req.email() == null || req.password() == null || tooLong(req.password())) {
 			throw unauthorized();
 		}
@@ -93,8 +97,17 @@ public class AuthService {
 		if (!user.isEmailVerified()) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "メールアドレスの確認がまだです");
 		}
-		//フロントエンドに返すデータの型をDTOのAuthResponseにする。DTOはフロントエンドに返すデータの型を定義するためのもの。
-		return new AuthResponse(user.getEmail(), "ログインしました");
+		// 本人確認ができたので、JWT（身分証明書）を発行してフロントに渡す
+		// フロントはこれを保存して、以降のリクエストの Authorization ヘッダーにつける
+		String token = tokenService.issue(user);
+		return new LoginResponse(user.getEmail(), token, "ログインしました");
+	}
+
+	// GET /api/me から呼ばれる。JWTに書かれていたユーザーIDで、DBから最新の情報を取ってくる
+	public MeResponse me(Long userId) {
+		// JWTは本物でも、その後ユーザーが削除されていることがあるので、そのときは401
+		User user = userRepository.findById(userId).orElseThrow(this::unauthorized);
+		return new MeResponse(user.getId(), user.getEmail());
 	}
 
 	// " A@Example.com " と "a@example.com" を同じメールとして扱う
