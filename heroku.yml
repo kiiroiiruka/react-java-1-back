@@ -1,0 +1,4 @@
+# Herokuに「Dockerfile を使ってアプリを作って」と伝えるファイル
+build:
+  docker:
+    web: Dockerfile
