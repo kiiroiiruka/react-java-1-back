@@ -36,6 +36,7 @@ public class AuthService {
 								public AuthService(PasswordEncoder passwordEncoder)
 								「PasswordEncoder 型のものをください」と言っているだけ
 	*/
+
 	public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
 			EmailVerificationService emailVerificationService) {
 		this.userRepository = userRepository;

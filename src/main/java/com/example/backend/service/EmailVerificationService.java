@@ -38,15 +38,18 @@ public class EmailVerificationService {
 	// spring-boot-starter-mail を入れると、Springがメール送信の道具を用意してくれる
 	private final JavaMailSender mailSender;
 	private final String frontendUrl;
+	private final String mailFrom;
 
-	// @Value application.properties の app.frontend-url の値を受け取る
+	// @Value application.properties の app.frontend-url などの値を受け取る
 	public EmailVerificationService(
 			EmailVerificationTokenRepository tokenRepository,
 			JavaMailSender mailSender,
-			@Value("${app.frontend-url}") String frontendUrl) {
+			@Value("${app.frontend-url}") String frontendUrl,
+			@Value("${app.mail-from}") String mailFrom) {
 		this.tokenRepository = tokenRepository;
 		this.mailSender = mailSender;
 		this.frontendUrl = frontendUrl;
+		this.mailFrom = mailFrom;
 	}
 
 	public void sendVerificationMail(User user) {
@@ -56,7 +59,7 @@ public class EmailVerificationService {
 		tokenRepository.save(new EmailVerificationToken(user, hash(rawToken), expiresAt));
 
 		SimpleMailMessage mail = new SimpleMailMessage();
-		mail.setFrom("no-reply@react-java-1.local");
+		mail.setFrom(mailFrom);
 		mail.setTo(user.getEmail());
 		mail.setSubject("【react-java-1】メールアドレスの確認");
 		mail.setText("""
