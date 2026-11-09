@@ -40,12 +40,14 @@ public class ShareService {
 	private final ShareRepository shareRepository;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final EmbedService embedService;
 
 	public ShareService(ShareRepository shareRepository, UserRepository userRepository,
-			PasswordEncoder passwordEncoder) {
+			PasswordEncoder passwordEncoder, EmbedService embedService) {
 		this.shareRepository = shareRepository;
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
+		this.embedService = embedService;
 	}
 
 	// userId は JWT から取り出したもの（= ログイン中の本人）
@@ -61,9 +63,12 @@ public class ShareService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "有効期限は今日以降にしてください");
 		}
 		User user = findUser(userId);
+		String url = req.url().trim();
 		Share share = new Share(
 				user,
-				req.url().trim(),
+				url,
+				// 埋め込めるサイトかを今のうちに調べておく（相手が開くたびに調べると遅いため）
+				embedService.findEmbedUrl(url).orElse(null),
 				req.title().trim(),
 				req.recipientName().trim(),
 				req.recipientEmail().trim(),
@@ -94,7 +99,7 @@ public class ShareService {
 		return new PublicShareResponse(share.getExpiresAt(), share.getTimeZone());
 	}
 
-	// パスワードが入力されたとき：合っていれば、共有されたURLを返す
+	// パスワードが入力されたとき：合っていれば、表示用のURL（埋め込み用 or 移動先）を返す
 	@Transactional(readOnly = true)
 	public OpenShareResponse open(String slug, String password) {
 		Share share = findAvailable(slug);
@@ -103,7 +108,7 @@ public class ShareService {
 			// ここは401ではなく403にする（401はフロントで「ログインが切れた」扱いになるため）
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "パスワードが違います");
 		}
-		return new OpenShareResponse(share.getUrl(), share.getTitle());
+		return OpenShareResponse.from(share);
 	}
 
 	private Share findAvailable(String slug) {

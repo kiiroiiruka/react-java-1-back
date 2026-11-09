@@ -37,6 +37,11 @@ public class Share {
 	@Column(nullable = false)
 	private String title;
 
+	// 公開ページの中に埋め込んで（iframeで）表示するときのURL
+	// 埋め込みを禁止しているサイトは null（そのときは、パスワード入力後にサイトへ移動する）
+	@Column(length = 2048)
+	private String embedUrl;
+
 	// ---- ステップ2：送信先 ----
 	@Column(nullable = false)
 	private String recipientName;
@@ -72,10 +77,12 @@ public class Share {
 	protected Share() {
 	}
 
-	public Share(User user, String url, String title, String recipientName, String recipientEmail,
-			String message, String passwordHash, LocalDate expiresAt, String timeZone, String slug) {
+	public Share(User user, String url, String embedUrl, String title, String recipientName,
+			String recipientEmail, String message, String passwordHash, LocalDate expiresAt, String timeZone,
+			String slug) {
 		this.user = user;
 		this.url = url;
+		this.embedUrl = embedUrl;
 		this.title = title;
 		this.recipientName = recipientName;
 		this.recipientEmail = recipientEmail;
@@ -93,6 +100,14 @@ public class Share {
 
 	public String getUrl() {
 		return url;
+	}
+
+	public String getEmbedUrl() {
+		return embedUrl;
+	}
+
+	public boolean isEmbeddable() {
+		return embedUrl != null;
 	}
 
 	public String getTitle() {
@@ -128,6 +143,12 @@ public class Share {
 	public boolean isExpired() {
 		LocalDate today = LocalDate.now(ZoneId.of(timeZone));
 		return today.isAfter(expiresAt);
+	}
+
+	// 閲覧できなくなる瞬間（有効期限の翌日の0:00。そのタイムゾーンで）
+	// 公開ページで埋め込み表示しているとき、この時刻になったら画面から消すのに使う
+	public Instant getClosesAt() {
+		return expiresAt.plusDays(1).atStartOfDay(ZoneId.of(timeZone)).toInstant();
 	}
 
 	public String getSlug() {

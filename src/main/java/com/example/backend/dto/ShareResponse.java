@@ -10,6 +10,8 @@ import com.example.backend.entity.Share;
 public record ShareResponse(
 		Long id,
 		String url,
+		// 公開ページの中に埋め込んで表示できるか（false なら、相手はサイトへ移動する）
+		boolean embeddable,
 		String title,
 		String recipientName,
 		String recipientEmail,
@@ -24,6 +26,7 @@ public record ShareResponse(
 		return new ShareResponse(
 				share.getId(),
 				share.getUrl(),
+				share.isEmbeddable(),
 				share.getTitle(),
 				share.getRecipientName(),
 				share.getRecipientEmail(),
