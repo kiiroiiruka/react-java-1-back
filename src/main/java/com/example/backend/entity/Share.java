@@ -2,6 +2,7 @@ package com.example.backend.entity;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -55,6 +56,11 @@ public class Share {
 	@Column(nullable = false)
 	private LocalDate expiresAt;
 
+	// どの国の時刻で有効期限を判定するか（"Asia/Tokyo" などのIANAタイムゾーンID）
+	// 同じ「12/31まで」でも、日本とニューヨークでは終わる瞬間が14時間ずれる
+	@Column(nullable = false)
+	private String timeZone;
+
 	// 共有用URL（/s/xxxx）に使うランダムな文字列。id（1, 2, 3…）だと他人のリンクを推測されるので使わない
 	@Column(nullable = false, unique = true)
 	private String slug;
@@ -67,7 +73,7 @@ public class Share {
 	}
 
 	public Share(User user, String url, String title, String recipientName, String recipientEmail,
-			String message, String passwordHash, LocalDate expiresAt, String slug) {
+			String message, String passwordHash, LocalDate expiresAt, String timeZone, String slug) {
 		this.user = user;
 		this.url = url;
 		this.title = title;
@@ -76,6 +82,7 @@ public class Share {
 		this.message = message;
 		this.passwordHash = passwordHash;
 		this.expiresAt = expiresAt;
+		this.timeZone = timeZone;
 		this.slug = slug;
 		this.createdAt = Instant.now();
 	}
@@ -106,6 +113,21 @@ public class Share {
 
 	public LocalDate getExpiresAt() {
 		return expiresAt;
+	}
+
+	public String getPasswordHash() {
+		return passwordHash;
+	}
+
+	public String getTimeZone() {
+		return timeZone;
+	}
+
+	// 有効期限の日を過ぎているか（期限の日の終わりまでは見られる）
+	// 「今日」は、このリンクに設定されたタイムゾーンでの今日で判定する
+	public boolean isExpired() {
+		LocalDate today = LocalDate.now(ZoneId.of(timeZone));
+		return today.isAfter(expiresAt);
 	}
 
 	public String getSlug() {

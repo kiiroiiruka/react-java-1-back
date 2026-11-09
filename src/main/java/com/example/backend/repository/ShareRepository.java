@@ -1,6 +1,7 @@
 package com.example.backend.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,4 +13,7 @@ public interface ShareRepository extends JpaRepository<Share, Long> {
 	// SELECT * FROM shares WHERE user_id = ? ORDER BY created_at DESC が自動で作られる
 	// （メソッド名の UserId は「user の id」と読まれる）
 	List<Share> findByUserIdOrderByCreatedAtDesc(Long userId);
+
+	// SELECT * FROM shares WHERE slug = ?（公開ページ /s/{slug} から使う）
+	Optional<Share> findBySlug(String slug);
 }

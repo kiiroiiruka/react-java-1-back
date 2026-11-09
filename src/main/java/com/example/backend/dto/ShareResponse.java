@@ -15,6 +15,7 @@ public record ShareResponse(
 		String recipientEmail,
 		String message,
 		LocalDate expiresAt,
+		String timeZone,
 		String slug,
 		Instant createdAt) {
 
@@ -28,6 +29,7 @@ public record ShareResponse(
 				share.getRecipientEmail(),
 				share.getMessage(),
 				share.getExpiresAt(),
+				share.getTimeZone(),
 				share.getSlug(),
 				share.getCreatedAt());
 	}

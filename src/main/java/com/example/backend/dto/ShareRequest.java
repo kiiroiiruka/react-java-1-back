@@ -3,7 +3,6 @@ package com.example.backend.dto;
 import java.time.LocalDate;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -21,6 +20,9 @@ public record ShareRequest(
 		@NotBlank @Email String recipientEmail,
 		@NotBlank @Size(max = 1000) String message,
 		@NotBlank @Size(min = 4, max = 72) String password,
-		// 過去の日付はNG（"2026-12-31" の形の文字列が LocalDate に変換される）
-		@NotNull @FutureOrPresent LocalDate expiresAt) {
+		// "2026-12-31" の形の文字列が LocalDate に変換される
+		// 過去の日付かどうかは、日本時間で判定したいので ShareService でチェックする
+		@NotNull LocalDate expiresAt,
+		// どの国の時刻で期限を判定するか（"Asia/Tokyo" など）。省略したら日本時間
+		@Size(max = 64) String timeZone) {
 }

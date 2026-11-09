@@ -27,8 +27,9 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
 				// 新規登録・ログイン・メール確認は、まだJWTを持っていない人が使うのでOKにする
+				// /api/public/** は共有リンクを受け取った人（ログインしていない人）が使う公開ページ用
 				// /error はエラー時にSpringが内部で使うURL。ここをふさぐと 409 などが全部 401 に化けてしまう
-				.requestMatchers("/api/auth/**", "/api/hello", "/error").permitAll()
+				.requestMatchers("/api/auth/**", "/api/public/**", "/api/hello", "/error").permitAll()
 				// それ以外のAPIは全部JWTが必要
 				.anyRequest().authenticated())
 			// 「Authorization: Bearer <JWT>」ヘッダーを読んで、JwtConfig の jwtDecoder でチェックする
