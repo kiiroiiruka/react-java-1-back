@@ -18,6 +18,8 @@ public record ShareResponse(
 		String message,
 		LocalDate expiresAt,
 		String timeZone,
+		// 有効期限が切れているか（一覧で「期限切れ」と表示するため）
+		boolean expired,
 		String slug,
 		Instant createdAt) {
 
@@ -33,6 +35,7 @@ public record ShareResponse(
 				share.getMessage(),
 				share.getExpiresAt(),
 				share.getTimeZone(),
+				share.isExpired(),
 				share.getSlug(),
 				share.getCreatedAt());
 	}

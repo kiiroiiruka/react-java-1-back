@@ -14,6 +14,10 @@ public interface ShareRepository extends JpaRepository<Share, Long> {
 	// （メソッド名の UserId は「user の id」と読まれる）
 	List<Share> findByUserIdOrderByCreatedAtDesc(Long userId);
 
+	// SELECT * FROM shares WHERE id = ? AND user_id = ?
+	// 「そのIDのリンク」かつ「自分のもの」だけが見つかる。他人のリンクは見つからない（= 消せない）
+	Optional<Share> findByIdAndUserId(Long id, Long userId);
+
 	// SELECT * FROM shares WHERE slug = ?（公開ページ /s/{slug} から使う）
 	Optional<Share> findBySlug(String slug);
 }

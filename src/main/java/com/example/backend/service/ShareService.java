@@ -89,6 +89,16 @@ public class ShareService {
 				.toList();
 	}
 
+	// 自分の共有リンクを削除する
+	// 他人のリンクのIDを指定された場合も「見つからない（404）」にする
+	// （403にすると「そのIDのリンクは存在する」ことが相手に分かってしまうため）
+	@Transactional
+	public void delete(Long userId, Long shareId) {
+		Share share = shareRepository.findByIdAndUserId(shareId, userId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "リンクが見つかりません"));
+		shareRepository.delete(share);
+	}
+
 	// ---- ここから下は公開ページ（/s/{slug}）用。ログインしていない人も呼ぶ ----
 
 	// 公開ページを開いたとき：リンクが存在して、期限内かだけを確認する
