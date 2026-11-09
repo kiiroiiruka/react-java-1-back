@@ -70,9 +70,6 @@ public class ShareService {
 				// 埋め込めるサイトかを今のうちに調べておく（相手が開くたびに調べると遅いため）
 				embedService.findEmbedUrl(url).orElse(null),
 				req.title().trim(),
-				req.recipientName().trim(),
-				req.recipientEmail().trim(),
-				req.message(),
 				// 共有リンクのパスワードも、ユーザーのパスワードと同じくハッシュ化してから保存する
 				passwordEncoder.encode(req.password()),
 				req.expiresAt(),
